@@ -10,9 +10,7 @@
 // This app_framework is mainly for a wrapper environment to run action scheduler as app/task/event framework, and manage low power mode sleep time based on event scheduling
 static uint32_t lastTick = 0;
 static bool suspendEnabled = true;
-#ifdef USE_WAKE_LOCK
 static uint8_t powerLockRecursive = 0;  // Enable low power when lock is 0
-#endif
 static bool suspendedLastRound = false;
 // This module assumes a 32768hz RTC
 
@@ -81,7 +79,6 @@ static inline uint32_t GetDurationToTimelineBeginning()
 
 void AppFramework_WakeLockRecursive(bool hold)
 {
-#ifdef USE_WAKE_LOCK
     uint32_t lock = Enter_Critical();
     if(hold)
     {
@@ -100,7 +97,6 @@ void AppFramework_WakeLockRecursive(bool hold)
     {
         DEBUG_PRINTF("Release WakeLock %d\n", powerLockRecursive);
     }
-#endif
 }
 
 // This schedule delay is relative to the timestamp when it executes, compare to to ActionScheduler_Schedule which is based on the head of the timeline at that moment
@@ -190,9 +186,7 @@ void AppFramework_Loop()
     Exit_Critical(lock);
     if(suspendEnabled)
     {
-#ifdef USE_WAKE_LOCK
         if (powerLockRecursive == 0U)
-#endif
         {
             uint32_t nextEventDelay = ActionScheduler_GetNextEventDelay();
             Suspend(nextEventDelay);
